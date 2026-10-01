@@ -1,0 +1,101 @@
+services:
+
+  # =========================
+  # MongoDB
+  # =========================
+
+  #"MongoDB ka ready-made Docker image use karo, version 8."
+  #Docker ko MongoDB install karne ke liye manually kuch nahi karna padega.
+  mongodb:
+    image: mongo:8
+    container_name: mongodb
+    restart: unless-stopped
+    #Agar container crash/restart ho gaya, Docker automatically dobara start karega.
+    #Lekin agar tum manually stop karoge, to automatically start nahi karega.
+
+    ports:
+      - "27017:27017"
+     #      Your Computer             Docker
+          #    |                       |
+      #    localhost:27017  --->  MongoDB:27017
+
+    volumes:
+      - mongodb_data:/data/db
+
+    networks:
+      - student-network
+
+
+  # =========================
+  # Spring Boot Backend
+  # =========================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile #"Mere current folder me jo Dockerfile hai, usse Spring Boot ka Docker image banao."
+             #Docker us Dockerfile ko read karke backend ka image banayega.
+    container_name: studentdetails-backend #Backend container ka naam:
+    restart: unless-stopped
+
+    ports:
+      - "8085:8085"
+
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/StudentRegistered
+
+    depends_on:
+      - mongodb
+
+    networks:
+      - student-network
+
+
+  # =========================
+  # Angular Frontend
+  # =========================
+  frontend:
+    build:
+      context: "../../Angular Projects/my-app"
+      # Angular project is location par hai, aur uske Dockerfile se image build karo.
+      dockerfile: Dockerfile
+
+    container_name: studentdetails-frontend
+    restart: unless-stopped
+
+    ports:
+      - "4200:4200"
+
+    depends_on:
+      - backend
+
+    networks:
+      - student-network
+
+
+# =========================
+# MongoDB Persistent Volume
+# =========================
+volumes:
+  mongodb_data: #Ek persistent storage bana ke rakho jiska naam mongodb_data hai.
+
+
+# =========================
+# Docker Network
+# =========================
+networks:
+  student-network: #Ye actual Docker network create karega:
+    driver: bridge #bridge basically Docker ka normal container-to-container networking mode hai.
+
+
+
+
+
+
+
+
+  #image       → ready-made image
+  #build       → Dockerfile se image banao
+  #container   → running application
+  #ports       → bahar se container ko access karna
+  #volume      → data ko permanently save rakhna
+  #network     → containers ko aapas me connect karna
