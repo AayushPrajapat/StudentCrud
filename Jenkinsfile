@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         jdk 'JDK21'
-        nodejs 'NodeJS20'
+        nodejs 'NodeJS24'
     }
 
     environment {
