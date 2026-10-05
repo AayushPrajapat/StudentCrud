@@ -8,7 +8,9 @@ pipeline {
 
     environment {
         COMPOSE_PROJECT_NAME = 'studentcrud'
-        PATH = "C:\\Users\\ncs\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
+        DOCKER_HOME          = 'C:\\Users\\ncs\\AppData\\Local\\Programs\\DockerDesktop'
+        DOCKER_CONFIG        = 'C:\\Users\\ncs\\.docker'
+        PATH                 = "${DOCKER_HOME}\\resources\\bin;${DOCKER_HOME}\\cli-plugins;${env.PATH}"
     }
 
     stages {
@@ -45,6 +47,7 @@ pipeline {
         stage('Docker - Verify') {
             steps {
                 bat 'docker version'
+                bat 'docker compose version'
                 bat 'docker compose config'
             }
         }
@@ -64,14 +67,14 @@ pipeline {
         }
     }
 
-   post {
-    success {
-        echo 'Pipeline successful ✅'
-        echo 'Frontend: http://localhost:4200 | Backend: http://localhost:8085'
+    post {
+        success {
+            echo 'Pipeline successful ✅'
+            echo 'Frontend: http://localhost:4200 | Backend: http://localhost:8085'
+        }
+        failure {
+            echo 'Pipeline failed ❌'
+            bat(returnStatus: true, script: 'docker compose logs --tail=50')
+        }
     }
-    failure {
-        echo 'Pipeline failed ❌'
-        bat(returnStatus: true, script: 'docker compose logs --tail=50')
-    }
-}
 }
