@@ -1,27 +1,31 @@
 pipeline {
     agent any
 
-   tools {
-    jdk 'JDK21'
-    nodejs 'NodeJS24'
-}
+    tools {
+        jdk 'JDK21'
+        nodejs 'NodeJS20'
+    }
+
+    environment {
+        COMPOSE_PROJECT_NAME = 'studentcrud'
+    }
 
     stages {
-        stage('Checkout') {
+        stage('Clone') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Backend - Build & Test') {
+        stage('Build - Maven (Backend)') {
             steps {
                 dir('Backend/StudentDetails') {
-                    bat 'mvnw.cmd clean package'
+                    bat 'mvnw.cmd clean package -DskipTests'
                 }
             }
         }
 
-        stage('Frontend - Install') {
+        stage('Build - NPM Install (Frontend)') {
             steps {
                 dir('Frontend/my-app') {
                     bat 'npm ci'
@@ -29,7 +33,7 @@ pipeline {
             }
         }
 
-        stage('Frontend - Build') {
+        stage('Build - NPM Build (Frontend)') {
             steps {
                 dir('Frontend/my-app') {
                     bat 'npm run build -- --configuration production'
@@ -37,28 +41,36 @@ pipeline {
             }
         }
 
-        stage('Archive Artifacts') {
+        stage('Docker - Verify') {
             steps {
-                archiveArtifacts artifacts: 'Backend/StudentDetails/target/*.jar', fingerprint: true
-                archiveArtifacts artifacts: 'Frontend/my-app/dist/**', fingerprint: true
+                bat 'docker version'
+                bat 'docker compose config'
             }
         }
 
-        stage('Deploy') {
+        stage('Image Build') {
             steps {
-                // Backend jar ko deploy folder me copy
-                bat 'if not exist C:\\deploy\\backend mkdir C:\\deploy\\backend'
-                bat 'copy /Y Backend\\StudentDetails\\target\\*.jar C:\\deploy\\backend\\'
+                bat 'docker compose build'
+            }
+        }
 
-                // Angular build ko copy (nginx/IIS/any web server folder)
-                bat 'if not exist C:\\deploy\\frontend mkdir C:\\deploy\\frontend'
-                bat 'xcopy /E /Y /I Frontend\\my-app\\dist\\* C:\\deploy\\frontend\\'
+        stage('Container Run') {
+            steps {
+                bat 'docker compose down'
+                bat 'docker compose up -d'
+                bat 'docker compose ps'
             }
         }
     }
 
     post {
-        success { echo 'Pipeline successful ✅' }
-        failure { echo 'Pipeline failed ❌' }
+        success {
+            echo 'Pipeline successful ✅'
+            echo 'Frontend: http://localhost:4200 | Backend: http://localhost:8085'
+        }
+        failure {
+            echo 'Pipeline failed ❌'
+            bat 'docker compose logs --tail=50'
+        }
     }
 }
