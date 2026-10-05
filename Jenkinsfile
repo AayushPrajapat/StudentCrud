@@ -28,21 +28,21 @@ pipeline {
             }
         }
 
-        // stage('Build - NPM Install (Frontend)') {
-        //     steps {
-        //         dir('Frontend/my-app') {
-        //             bat 'npm ci'
-        //         }
-        //     }
-        // }
+        stage('Build - NPM Install (Frontend)') {
+            steps {
+                dir('Frontend/my-app') {
+                    bat 'npm ci'
+                }
+            }
+        }
 
-        // stage('Build - NPM Build (Frontend)') {
-        //     steps {
-        //         dir('Frontend/my-app') {
-        //             bat 'npm run build -- --configuration production'
-        //         }
-        //     }
-        // }
+        stage('Build - NPM Build (Frontend)') {
+            steps {
+                dir('Frontend/my-app') {
+                    bat 'npm run build -- --configuration production'
+                }
+            }
+        }
 
         stage('Docker - Verify') {
             steps {
