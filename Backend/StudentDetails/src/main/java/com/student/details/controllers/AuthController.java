@@ -39,8 +39,4 @@ public class AuthController {
         List<User> users = this.userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
-
-
-
-
 }
