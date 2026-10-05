@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         COMPOSE_PROJECT_NAME = 'studentcrud'
+        PATH = "C:\\Users\\ncs\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
     }
 
     stages {
@@ -63,14 +64,14 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            echo 'Pipeline successful ✅'
-            echo 'Frontend: http://localhost:4200 | Backend: http://localhost:8085'
-        }
-        failure {
-            echo 'Pipeline failed ❌'
-            bat 'docker compose logs --tail=50'
-        }
+   post {
+    success {
+        echo 'Pipeline successful ✅'
+        echo 'Frontend: http://localhost:4200 | Backend: http://localhost:8085'
     }
+    failure {
+        echo 'Pipeline failed ❌'
+        bat(returnStatus: true, script: 'docker compose logs --tail=50')
+    }
+}
 }
