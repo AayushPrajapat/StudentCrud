@@ -31,7 +31,7 @@ services:
   # =========================
   backend:
     build:
-      context: .
+      context: ./Backend/StudentDetails
       dockerfile: Dockerfile #"Mere current folder me jo Dockerfile hai, usse Spring Boot ka Docker image banao."
              #Docker us Dockerfile ko read karke backend ka image banayega.
     container_name: studentdetails-backend #Backend container ka naam:
@@ -55,7 +55,7 @@ services:
   # =========================
   frontend:
     build:
-      context: "../../Angular Projects/my-app"
+      context: "./Frontend/my-app"
       # Angular project is location par hai, aur uske Dockerfile se image build karo.
       dockerfile: Dockerfile
 
