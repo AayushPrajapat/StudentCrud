@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 // Controller ke URLs ka base path define karna.
 // @RequestMapping tells Spring which URL should be handled by a controller or controller method.
 @RestController
