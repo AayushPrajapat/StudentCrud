@@ -4,18 +4,22 @@ import com.student.details.entities.LoginRequest;
 import com.student.details.entities.User;
 import com.student.details.exceptions.EmailRegisteredException;
 import com.student.details.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     //    SignUp
     /*
@@ -25,25 +29,33 @@ public class UserService {
     false → value does not exist
     */
     public User signUpUser(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+        String normalizedEmail = normalizeEmail(user.getEmail());
+        user.setEmail(normalizedEmail);
+        user.setName(user.getName());
+
+        if (userRepository.findByEmail(normalizedEmail).isPresent()) {
             throw new EmailRegisteredException();
         }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
     public String loginUser(LoginRequest loginRequest) {
-        Optional<User> user = userRepository.findByEmail(loginRequest.getEmail());
-        if (user.isPresent()) {
-            User existingUser = user.get();
-            if (existingUser.getPassword().equals(loginRequest.getPassword())) {
-                return "User Login SuccessFully..!!";
-            }
-            return "Wrong Password..!!";
-        }
-        return "Email Not Found..!!";
+        String normalizedEmail = normalizeEmail(loginRequest.getEmail());
+
+        return userRepository.findByEmail(normalizedEmail)
+                .map(user -> passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())
+                        ? "User Login SuccessFully..!!"
+                        : "Wrong Password..!!")
+                .orElse("Email Not Found..!!");
     }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
     }
 }
