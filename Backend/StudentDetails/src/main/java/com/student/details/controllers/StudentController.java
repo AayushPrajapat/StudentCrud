@@ -32,6 +32,16 @@ public class StudentController {
         return new ResponseEntity<>(allStudents, HttpStatus.OK);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Student>> searchStudents(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email) {
+        return new ResponseEntity<>(
+                studentService.searchStudents(firstName, lastName, email),
+                HttpStatus.OK);
+    }
+
     //  Student By Id
     @GetMapping("/{studentId}")
     public ResponseEntity<?> getStudentById(@PathVariable String studentId) {

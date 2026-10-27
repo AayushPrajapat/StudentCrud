@@ -57,6 +57,11 @@ public class StudentServiceImpl implements StudentService {
         return studentRepository.findAll();
     }
 
+    @Override
+    public List<Student> searchStudents(String firstName, String lastName, String email) {
+        return studentRepository.searchStudents(firstName, lastName, email);
+    }
+
     // GET BY ID
     @Override
     public Student getStudentById(String id) {

@@ -13,6 +13,8 @@ public interface StudentService {
     void deleteStudent(String id);
     //   Get All Students
     List<Student> getAllStudents();
+    // Search students by the supplied fields
+    List<Student> searchStudents(String firstName, String lastName, String email);
     //  Get Students by Id
     Student getStudentById(String id);
 
